@@ -3,47 +3,41 @@ using UnityEngine.UI;
 
 public class TankShooting : MonoBehaviour
 {
-    public int m_PlayerNumber = 1;       
-    public Rigidbody m_Shell;            
-    public Transform m_FireTransform;    
-    public Slider m_AimSlider;           
-    public AudioSource m_ShootingAudio;  
-    public AudioClip m_ChargingClip;     
-    public AudioClip m_FireClip;         
-    public float m_MinLaunchForce = 15f; 
-    public float m_MaxLaunchForce = 30f; 
-    public float m_MaxChargeTime = 0.75f;
+    public GameObject prefab;
+    public Transform firePosition;
+    public float minFirePower = 5f;
+    public float maxFirePower = 30f;
+    public float chargeRate = 10f;
+    public float reload = 2f;
 
-    /*
-    private string m_FireButton;         
-    private float m_CurrentLaunchForce;  
-    private float m_ChargeSpeed;         
-    private bool m_Fired;                
+    private float currentFirePower;
+    private bool isCharging;
+    private float lastTimeFire;
+    private bool canShot;
 
+    void Update(){
+        canShot = Time.time > lastTimeFire + reload;
 
-    private void OnEnable()
-    {
-        m_CurrentLaunchForce = m_MinLaunchForce;
-        m_AimSlider.value = m_MinLaunchForce;
+        if (Input.GetButtonDown("Fire1")){
+            currentFirePower = minFirePower;
+            isCharging = true;
+        }
+
+        if (Input.GetButton("Fire1") && isCharging) {
+            currentFirePower += chargeRate * Time.deltaTime;
+            currentFirePower = Mathf.Min(currentFirePower, maxFirePower);
+        }
+
+        if (Input.GetButtonUp("Fire1") && canShot) {
+            Fire();
+            isCharging = false;
+            lastTimeFire = Time.time;
+        }
     }
 
-
-    private void Start()
-    {
-        m_FireButton = "Fire" + m_PlayerNumber;
-
-        m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
-    }
-    */
-
-    private void Update()
-    {
-        // Track the current state of the fire button and make decisions based on the current launch force.
-    }
-
-
-    private void Fire()
-    {
-        // Instantiate and launch the shell.
+    void Fire(){
+        GameObject shot = Instantiate(prefab, firePosition.position, firePosition.rotation);
+        Rigidbody rb = shot.GetComponent<Rigidbody>();
+        rb.velocity = firePosition.forward * currentFirePower;
     }
 }
